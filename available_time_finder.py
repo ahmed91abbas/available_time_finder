@@ -13,6 +13,8 @@ class Available_time_finder:
         print("Loading browser driver...")
         self.load_driver("firefox")
         self.connect_to(self.url)
+        self.get_results()
+        self.close_driver()
 
     def load_driver(self, browser):
         _platform = sys.platform
@@ -68,9 +70,10 @@ class Available_time_finder:
         self.driver.find_element_by_xpath("//div[@class='btn-toolbar']//input[@name='Next']").click()
         options = Select(self.driver.find_element_by_id('SectionId'))
         options.select_by_visible_text(self.area)
-        self.driver.find_element_by_name("TimeSearchFirstAvailableButton").click()
         print("Found source.")
-        self.driver.stop_client()
+
+    def get_results(self):
+        self.driver.find_element_by_name("TimeSearchFirstAvailableButton").click()
         self.page_source = self.driver.page_source
         self.soup = BeautifulSoup(self.page_source, 'html.parser')
         cells = self.soup.find_all('div', {"data-function":"timeTableCell"})
@@ -84,6 +87,9 @@ class Available_time_finder:
         for i in range(self.number_results):
             if i < len(available_times):
                 print(available_times[i])
+
+    def close_driver(self):
+        self.driver.stop_client()
         self.driver.close()
         self.driver.quit()
 
