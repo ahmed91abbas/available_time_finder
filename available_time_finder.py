@@ -12,9 +12,9 @@ class Available_time_finder:
         self.number_results = number_results
         print("Loading browser driver...")
         self.load_driver("firefox")
-        self.connect_to(self.url)
-        self.get_results()
-        self.close_driver()
+        #self.connect()
+        # self.get_results()
+        # self.close_driver()
 
     def load_driver(self, browser):
         _platform = sys.platform
@@ -62,9 +62,9 @@ class Available_time_finder:
             print(msg)
             sys.exit(1)
 
-    def connect_to(self, url):
+    def connect(self):
         print("Connecting...")
-        self.driver.get(url)
+        self.driver.get(self.url)
         self.driver.find_element_by_name("NextButtonID20").click()
         self.driver.find_element_by_name("AcceptInformationStorage").click()
         self.driver.find_element_by_xpath("//div[@class='btn-toolbar']//input[@name='Next']").click()
@@ -84,9 +84,12 @@ class Available_time_finder:
         def getKey(item):
             return re.findall(r'\b\d+\b', item)
         available_times = sorted(available_times, key=getKey)
+        res = []
         for i in range(self.number_results):
             if i < len(available_times):
                 print(available_times[i])
+                res.append(available_times[i])
+        return res
 
     def close_driver(self):
         self.driver.stop_client()
