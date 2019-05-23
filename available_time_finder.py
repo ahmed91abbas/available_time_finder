@@ -33,8 +33,8 @@ class Available_time_finder:
             try:
                 from selenium.webdriver.firefox.options import Options
                 firefox_options = Options()
-                firefox_options.add_argument("--headless")
-                self.driver = webdriver.Firefox(executable_path=firefox_driver_path, firefox_options=firefox_options)
+                #firefox_options.add_argument("--headless")
+                self.driver = webdriver.Firefox(executable_path=firefox_driver_path)#, firefox_options=firefox_options)
                 print("Loaded firefox driver.")
             except Exception as e:
                 if 'executable needs to be in PATH' in str(e): #driver not found
@@ -76,7 +76,11 @@ class Available_time_finder:
         print("Found source.")
 
     def get_results(self):
-        self.driver.find_element_by_name("TimeSearchFirstAvailableButton").click()
+        try:
+            self.driver.find_element_by_name("TimeSearchFirstAvailableButton").click()
+        except:
+            self.connected = False
+            self.connect()
         self.page_source = self.driver.page_source
         self.soup = BeautifulSoup(self.page_source, 'html.parser')
         cells = self.soup.find_all('div', {"data-function":"timeTableCell"})

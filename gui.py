@@ -72,7 +72,7 @@ class GUI:
         self.status_label.pack(side="left", padx=padx)
 
         tk.Label(self.status_frame, text="Next refresh in:").pack(side="left", padx=padx)
-        self.timer_label = tk.Label(self.status_frame, width=width)
+        self.timer_label = tk.Label(self.status_frame)
         self.timer_label.pack(side="left")
 
         wlist = 50
@@ -110,21 +110,19 @@ class GUI:
         if not self.stop_event.is_set():
             t = threading.Timer(interval, self.get_results)
             t.daemon = True
-            now = datetime.datetime.now()
-            next_run = now + datetime.timedelta(seconds=interval)
-            self.timer_label['text'] = self.time_str(next_run)
             t.start()
+            self.count_down(interval)
 
-    def time_str(self, time):
-        year = str(time.year)
-        month = '{:02d}'.format(time.month)
-        day = '{:02d}'.format(time.day)
-        date = year + "-" + month + "-" + day
-        hour = '{:02d}'.format(time.hour)
-        minute = '{:02d}'.format(time.minute)
-        second = '{:02d}'.format(time.second)
-        clock = hour + ":" + minute + ":" + second
-        return clock
+    def count_down(self, seconds):
+        if self.stop_event.is_set():
+            return
+        if seconds > 0:
+            self.timer_label['text'] = seconds
+            t = threading.Timer(1, self.count_down, [seconds-1])
+            t.daemon = True
+            t.start()
+        else:
+            self.timer_label['text'] = seconds
 
     def interval_to_sec(self):
         choice, unit = self.interval.split(" ")
