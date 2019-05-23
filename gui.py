@@ -24,7 +24,7 @@ class GUI:
         self.list_frame = tk.Frame(self.root)
 
         pady = 10
-        self.start_frame.pack(pady=pady)
+        self.start_frame.pack(padx=3, pady=pady)
         self.results_opt_frame.pack(pady=pady)
         self.buttons_frame.pack(pady=pady)
         self.status_frame.pack(pady=pady)
@@ -102,12 +102,12 @@ class GUI:
         self.get_results()
 
     def get_results(self):
-        interval = self.interval_to_sec()
-        times = self.finder.get_results()
-        self.times_list.delete(0,'end')
-        for time in times:
-            self.times_list.insert(tk.END, time)
         if not self.stop_event.is_set():
+            interval = self.interval_to_sec()
+            times = self.finder.get_results()
+            self.times_list.delete(0,'end')
+            for time in times:
+                self.times_list.insert(tk.END, time)
             t = threading.Timer(interval, self.get_results)
             t.daemon = True
             t.start()

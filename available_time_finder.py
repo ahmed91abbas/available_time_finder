@@ -33,8 +33,8 @@ class Available_time_finder:
             try:
                 from selenium.webdriver.firefox.options import Options
                 firefox_options = Options()
-                #firefox_options.add_argument("--headless")
-                self.driver = webdriver.Firefox(executable_path=firefox_driver_path)#, firefox_options=firefox_options)
+                firefox_options.add_argument("--headless")
+                self.driver = webdriver.Firefox(executable_path=firefox_driver_path, firefox_options=firefox_options)
                 print("Loaded firefox driver.")
             except Exception as e:
                 if 'executable needs to be in PATH' in str(e): #driver not found
@@ -94,7 +94,6 @@ class Available_time_finder:
         res = []
         for i in range(self.number_results):
             if i < len(available_times):
-                print(available_times[i])
                 res.append(available_times[i])
         return res
 
