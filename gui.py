@@ -14,7 +14,7 @@ class GUI:
 
     def create_gui(self):
         self.root = tk.Tk()
-        self.root.title("WeDi")
+        self.root.title("Available times finder")
         self.root.wm_protocol("WM_DELETE_WINDOW", self.on_close)
 
         self.start_frame = tk.Frame(self.root)
@@ -33,7 +33,7 @@ class GUI:
         tk.Label(self.start_frame, text="Select Area:").pack(side="left")
         def set_area(value):
             self.finder.area = value
-        areas = ["Malmö", "Lund"]
+        areas = ["Malmö", "Lund", "Kristianstad"]
         self.area_option = tk.StringVar()
         self.area_option.set(self.finder.area)
         self.area_options = tk.OptionMenu(self.start_frame, self.area_option, *areas, command=set_area)
@@ -87,6 +87,8 @@ class GUI:
         self.root.mainloop()
 
     def on_start(self):
+        if self.stop_event.is_set():
+            self.stop_event.clear()
         self.start_button["state"] = "disabled"
         self.stop_button["state"] = "normal"
         try:
@@ -135,14 +137,14 @@ class GUI:
         self.stop_event.set()
         self.start_button["state"] = "normal"
         self.stop_button["state"] = "disabled"
-        try:
-            self.finder.close_driver()
-        except:
-            pass
         self.status_label.config(text="Disconnected", bg="red")
 
     def on_close(self):
         self.on_stop()
+        try:
+            self.finder.close_driver()
+        except:
+            pass
         self.root.destroy()
 
 if __name__ == '__main__':

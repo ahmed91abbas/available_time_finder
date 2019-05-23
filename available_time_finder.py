@@ -12,6 +12,7 @@ class Available_time_finder:
         self.number_results = number_results
         print("Loading browser driver...")
         self.load_driver("firefox")
+        self.connected = False
         #self.connect()
         # self.get_results()
         # self.close_driver()
@@ -64,10 +65,12 @@ class Available_time_finder:
 
     def connect(self):
         print("Connecting...")
-        self.driver.get(self.url)
-        self.driver.find_element_by_name("NextButtonID20").click()
-        self.driver.find_element_by_name("AcceptInformationStorage").click()
-        self.driver.find_element_by_xpath("//div[@class='btn-toolbar']//input[@name='Next']").click()
+        if not self.connected:
+            self.driver.get(self.url)
+            self.driver.find_element_by_name("NextButtonID20").click()
+            self.driver.find_element_by_name("AcceptInformationStorage").click()
+            self.driver.find_element_by_xpath("//div[@class='btn-toolbar']//input[@name='Next']").click()
+            self.connected = True
         options = Select(self.driver.find_element_by_id('SectionId'))
         options.select_by_visible_text(self.area)
         print("Found source.")
