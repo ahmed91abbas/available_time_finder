@@ -1,6 +1,7 @@
 import tkinter as tk
 from available_time_finder import Available_time_finder
 import threading
+import datetime
 
 class GUI:
     def __init__(self, url):
@@ -71,6 +72,8 @@ class GUI:
         self.status_label.pack(side="left", padx=padx)
 
         tk.Label(self.status_frame, text="Next refresh in:").pack(side="left", padx=padx)
+        self.timer_label = tk.Label(self.status_frame, width=width)
+        self.timer_label.pack(side="left")
 
         wlist = 50
         hlist = 15
@@ -99,15 +102,27 @@ class GUI:
     def get_results(self):
         interval = self.interval_to_sec()
         times = self.finder.get_results()
+        self.times_list.delete(0,'end')
         for time in times:
             self.times_list.insert(tk.END, time)
-        #if(not self.stop_event.is_set()):
-            # t = threading.Timer(self.interval, self.reset_and_run)
-            # t.daemon = True
-            # now = datetime.datetime.now()
-            # next_run = now + datetime.timedelta(seconds=self.interval)
-            # self.start_label['text'] = "Market: " + self.country_code + "\nNext iteration is scheduled on " + self.time_str(next_run)
-            # t.start()
+        if not self.stop_event.is_set():
+            t = threading.Timer(interval, self.get_results)
+            t.daemon = True
+            now = datetime.datetime.now()
+            next_run = now + datetime.timedelta(seconds=interval)
+            self.timer_label['text'] = self.time_str(next_run)
+            t.start()
+
+    def time_str(self, time):
+        year = str(time.year)
+        month = '{:02d}'.format(time.month)
+        day = '{:02d}'.format(time.day)
+        date = year + "-" + month + "-" + day
+        hour = '{:02d}'.format(time.hour)
+        minute = '{:02d}'.format(time.minute)
+        second = '{:02d}'.format(time.second)
+        clock = hour + ":" + minute + ":" + second
+        return clock
 
     def interval_to_sec(self):
         choice, unit = self.interval.split(" ")
@@ -120,10 +135,10 @@ class GUI:
         self.stop_event.set()
         self.start_button["state"] = "normal"
         self.stop_button["state"] = "disabled"
-        # try:
-        #     self.finder.close_driver()
-        # except:
-        #     pass
+        try:
+            self.finder.close_driver()
+        except:
+            pass
         self.status_label.config(text="Disconnected", bg="red")
 
     def on_close(self):
