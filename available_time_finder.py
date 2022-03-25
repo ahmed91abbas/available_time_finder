@@ -1,3 +1,4 @@
+from time import sleep
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
@@ -14,13 +15,16 @@ def init_driver():
     return webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
 
 
-def get_available_times_source(url, driver):
+def navigate_to_times_page(url, driver):
     driver.get(url)
     driver.find_element(by=By.NAME, value="StartNextButton").click()
     driver.find_element(by=By.NAME, value="AcceptInformationStorage").click()
     driver.find_element(by=By.NAME, value="Next").click()
     driver.find_element(by=By.ID, value="ServiceCategoryCustomers_0__ServiceCategoryId").click()
     driver.find_element(by=By.NAME, value="Next").click()
+
+
+def get_available_times_source(driver):
     driver.find_element(by=By.NAME, value="TimeSearchFirstAvailableButton").click()
     return driver.page_source
 
@@ -40,11 +44,12 @@ def get_available_times(cell):
 if __name__ == '__main__':
     driver = init_driver()
     url = 'https://bokapass.nemoq.se/Booking/Booking/Index/skane'
-    page_source = get_available_times_source(url, driver)
-    available_times = get_available_times(page_source)
-    for city, times in available_times.items():
-        print(city)
-        print(times)
-        print()
-
-    driver.find_element(by=By.NAME, value="Next").click()
+    navigate_to_times_page(url, driver)
+    while True:
+        page_source = get_available_times_source(driver)
+        available_times = get_available_times(page_source)
+        for city, times in available_times.items():
+            print(city)
+            print(times)
+            print()
+        sleep(10)
