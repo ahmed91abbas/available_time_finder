@@ -1,4 +1,5 @@
 from time import sleep
+from datetime import datetime
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
@@ -46,11 +47,16 @@ def get_available_times(page_source):
 
 
 def get_accepted_date(day_text, available_times, conditions):
+    current_date = datetime.now()
     if day_text in conditions['accepted_days']:
         for city in conditions['accepted_cities']:
             dates = available_times[city]
-            for date in dates:
-                if int(date.split(' ')[1].split(':')[0]) >= conditions['earliest_accepted_hour']:
+            for date_str in dates:
+                date = datetime.strptime(date_str, '%Y-%m-%d %H:%M:%S')
+                duration = date - current_date
+                offset = duration.total_seconds()/3600
+                if date.hour >= conditions['earliest_accepted_hour'] and offset >= conditions['hours_offset']:
+                    print(city, date)
                     return date
     return None
 
@@ -70,13 +76,15 @@ def book_passport_time(url, conditions):
 
     driver.find_element(by=By.CSS_SELECTOR, value=f"[aria-label=\'{accepted_date}\']").click()
     driver.find_element(by=By.NAME, value="Next").click()
+    input()
 
 
 if __name__ == '__main__':
     url = 'https://bokapass.nemoq.se/Booking/Booking/Index/skane'
     conditions = {
-        'accepted_days': ['lördag'],
-        'accepted_cities': ['Malmö', 'Lund'],
-        'earliest_accepted_hour': 11
+        'accepted_days': ['lördag', 'tisdag', 'måndag', 'onsdag'],
+        'accepted_cities': ['Malmö', 'Lund', 'Hässleholm'],
+        'earliest_accepted_hour': 11,
+        'hours_offset': 48
     }
     book_passport_time(url, conditions)
