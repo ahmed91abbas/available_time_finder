@@ -29,27 +29,54 @@ def get_available_times_source(driver):
     return driver.page_source
 
 
-def get_available_times(cell):
+def get_available_times(page_source):
     result = defaultdict(list)
     soup = BeautifulSoup(page_source, 'html.parser')
+    day_text_span = soup.find('span', {"id":"dayText"})
+    day_text = ''
+    if day_text_span:
+        day_text = day_text_span.string.split()[0]
     cells = soup.find_all('td', {"class":"timetable-cells"})
     if cells:
         for cell in cells:
             city = cell['headers'][0]
-            time = cell.find_all('input', {"name":"ReservedDateTime"})[0]['value']
-            result[city].append(time)
-    return result
+            date = cell.find_all('input', {"name":"ReservedDateTime"})[0]['value']
+            result[city].append(date)
+    return day_text, result
+
+
+def get_accepted_date(day_text, available_times, conditions):
+    if day_text in conditions['accepted_days']:
+        for city in conditions['accepted_cities']:
+            dates = available_times[city]
+            for date in dates:
+                if int(date.split(' ')[1].split(':')[0]) >= conditions['earliest_accepted_hour']:
+                    return date
+    return None
+
+
+def book_passport_time(url, conditions):
+    driver = init_driver()
+    navigate_to_times_page(url, driver)
+
+    accepted_date = None
+    while not accepted_date:
+        page_source = get_available_times_source(driver)
+        day_text, available_times = get_available_times(page_source)
+        accepted_date = get_accepted_date(day_text, available_times, conditions)
+        if accepted_date:
+            break
+        sleep(10)
+
+    driver.find_element(by=By.CSS_SELECTOR, value=f"[aria-label=\'{accepted_date}\']").click()
+    driver.find_element(by=By.NAME, value="Next").click()
 
 
 if __name__ == '__main__':
-    driver = init_driver()
     url = 'https://bokapass.nemoq.se/Booking/Booking/Index/skane'
-    navigate_to_times_page(url, driver)
-    while True:
-        page_source = get_available_times_source(driver)
-        available_times = get_available_times(page_source)
-        for city, times in available_times.items():
-            print(city)
-            print(times)
-            print()
-        sleep(10)
+    conditions = {
+        'accepted_days': ['lördag'],
+        'accepted_cities': ['Malmö', 'Lund'],
+        'earliest_accepted_hour': 11
+    }
+    book_passport_time(url, conditions)
