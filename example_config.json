@@ -1,0 +1,11 @@
+{
+    "conditions": {
+        "accepted_days": ["lördag"],
+        "accepted_cities": ["Malmö", "Lund"],
+        "earliest_accepted_hour": 11,
+        "hours_offset": 3
+    },
+    "email": "foo@bar.com",
+    "first_name": "Foo",
+    "last_name": "Bar"
+}
